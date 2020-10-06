@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src='https://kit.fontawesome.com/a076d05399.js'></script>
+    <?!= include('codemirror.js'); ?>
+    <?!= include('codemirrorcss.js'); ?>
+    <?!= include('codemirrorsql.js'); ?>
+    <style>
+      body {
+          
+        }
+      h1 {
+        color: black;
+      }
+      
+     form{
+       text-align:center;
+     }
+      #btn{
+          width: 95%;
+          margin-top: 20px;
+          margin-bottom: 105px;
+      }
+      #textfield{
+          width: 85%;
+          font-size:12px;
+          height: 300px;
+          resize: none;
+      }
+      #btntxt{
+          width: 10%;
+          
+      }
+      
+      #queries{
+         width: 95%;
+         margin-bottom: 30px;
+      }
+      #sheet{
+         width: 95%;
+      }
+      label{
+        margin-top:5px;
+      }
+      #select{
+        margin-top:10px;
+        text-align:center;
+      }
+      #hourday{
+        text-align:center;
+      }
+      
+      #buttonsBottom{
+        text-align:center;
+      }
+      
+    </style>
+  </head>
+  <body>
+      <label id='textlabel'> Select a query:</label>
+       <form name="queryForm" id="queryForm" method="post" autocomplete="off">
+      <select id="queries" name="queries">
+        <option></option>
+      </select>
+      </form>
+      <label id='textlabel'> Type a query:</label>
+      <form>
+      <textarea list="queries" name="name" placeholder="Type the query.." id="textfield"></textarea>
+       </form>
+       <label>Select sheet:</label>
+       <form>
+       <select id="sheet" name="sheet">
+        <option></option>
+      </select><br>
+      </form>
+       <form action="" id="select">
+         <label><input type="radio" name="update" value="daily" onclick="daily()" id="buttonDaily"> Daily</label>
+         <label><input type="radio" name="update" value="weekly" onclick="weekly()" id="buttonWeekly"> Weekly</label>
+         <label><input type="radio" name="update" value="hourly" onclick="hourly()" id="buttonHourly"> Hourly</label>
+      </form>
+       <form action="" id="hourday">
+      <label id='labelHour'>Hour:</label>
+      <select id="hour" name="hour">
+        <option value="1">1 a.m.</option>
+        <option value="2">2 a.m.</option>
+        <option value="3">3 a.m.</option>
+        <option value="4">4 a.m.</option>
+        <option value="5">5 a.m.</option>
+        <option value="6">6 a.m.</option>
+        <option value="7">7 a.m.</option>
+        <option value="8">8 a.m.</option>
+        <option value="9">9 a.m.</option>
+        <option value="10">10 a.m.</option>
+        <option value="11">11 a.m.</option>
+        <option value="12">12 p.m.</option>
+        <option value="13">1 p.m.</option>
+        <option value="14">2 p.m.</option>
+        <option value="15">3 p.m.</option>
+        <option value="16">4 p.m.</option>
+        <option value="17">5 p.m.</option>
+        <option value="18">6 p.m.</option>
+        <option value="19">7 p.m.</option>
+        <option value="20">8 p.m.</option>
+        <option value="21">9 p.m.</option>
+        <option value="22">10 p.m.</option>
+        <option value="23">11 p.m.</option>
+        <option value="0">12 a.m.</option>
+      </select><br>
+       <label id='labelday'>Day:</label>
+      <select id="day" name="day">
+        <option value="MONDAY">Monday</option>
+        <option value="TUESDAY">Tuesday</option>
+        <option value="WEDNESDAY">Wednesday</option>
+        <option value="THURSDAY">Thurdsay</option>
+        <option value="FRIDAY">Friday</option>
+        <option value="SATURDAY">Saturday</option>
+        <option value="SUNDAY">Sunday</option>
+      </select><br> 
+       </form>
+       <form id="buttonsBottom">
+      <button type="submit" id="btn">Submit</button><br> 
+      <button id="progressSheet"></button> &nbsp;
+      <button id="btnStopUpdate"><i class="fa fa-power-off" ></i> Stop Update</button><br>
+      </form>
+   </body>
+   <script>  
+ 
+     var editor;
+    
+      google.script.run.withSuccessHandler(onCheck).checkConnectionWithDB();
+      
+      progressSheet();
+      
+      
+      var updateQuery = '<?= getUpdateQuery() ?>'
+      var sheet = '<?= getUpdateSheet() ?>'
+      var day = '<?= getDay() ?>'
+      var hour = '<?= getHour() ?>'
+      var trigger = '<?= triggerOnOff() ?>'
+      
+     
+     function progressSheet(){
+
+         google.script.run.withSuccessHandler(isHid).isHidden();
+         
+         function isHid(hid){
+            document.getElementById("progressSheet").style.visibility = "visible";
+            console.log('hello');
+            if(hid == null){
+               document.getElementById("progressSheet").style.visibility = "hidden";
+               console.log('null');
+            }else if(hid){
+              $('#progressSheet').html($('<i/>',{class:'fa fa-clock-o'})).append(' See updates');
+            }else{
+               $('#progressSheet').html($('<i/>',{class:'fa fa-clock-o' })).append(' Close updates');
+            }
+            console.log('hid' + hid);
+         }
+     }
+     
+     google.script.run.withSuccessHandler(onSuccessSheet).getSheetNames();
+     
+      
+     function onSuccessSheet( values ){
+          $('#sheet').empty();
+          
+          $.each(values, function(key, value) {   
+             $('#sheet').append($("<option></option>").text(value)); });
+             if (sheet!=null){document.getElementById("sheet").value = sheet;}
+      }  
+      
+      function onCheck( value ){
+          var con = value;
+          if (!con){
+          google.script.run.showDBConnectionSidebar();
+          }
+      }
+        editor = CodeMirror.fromTextArea(document.getElementById("textfield"));
+        document.getElementById("btnStopUpdate").style.visibility = "hidden";
+        document.getElementById("day").style.visibility = "hidden";
+        document.getElementById("labelday").style.visibility = "hidden";
+        document.getElementById("buttonDaily").checked = true;
+       
+         
+         google.script.run.withSuccessHandler(onSuccess).getQueries();
+      
+      function daily() {
+          document.getElementById("day").style.visibility = "hidden";
+          document.getElementById("labelday").style.visibility = "hidden";
+          document.getElementById("labelHour").style.visibility = "visible";
+          document.getElementById("hour").style.visibility = "visible";
+        }
+        function weekly() {
+          document.getElementById("labelday").style.visibility = "visible";
+          document.getElementById("day").style.visibility = "visible";
+          document.getElementById("labelHour").style.visibility = "visible";
+          document.getElementById("hour").style.visibility = "visible";
+        }
+        function hourly() {
+          document.getElementById("day").style.visibility = "hidden";
+          document.getElementById("labelday").style.visibility = "hidden";
+          document.getElementById("hour").style.visibility = "hidden";
+          document.getElementById("labelHour").style.visibility = "hidden";
+        }
+      
+      function onSuccess( values ){
+          $('#queries').empty();
+          $('#queries').append($("<option selected disabled></option>").text('Select a query..'));
+          $.each(values, function(key, value) {   
+             $('#queries').append($("<option></option>").text(value)); });
+      } 
+      
+      $(document).ready(function(){
+             editor.setValue(updateQuery);
+             
+             if(day!='noDay' && day!=''){
+              document.getElementById("buttonWeekly").checked = true;
+              document.getElementById("labelday").style.visibility = "visible";
+              document.getElementById("day").style.visibility = "visible";
+              console.log('day: '+day);
+              document.getElementById("day").value = day;
+             }
+             if(hour!='noHour' && hour!=''){
+              console.log('hour: '+hour);
+              document.getElementById("hour").value = hour;
+             }else if(hour == 'noHour'){
+               document.getElementById("buttonHourly").checked = true;
+               document.getElementById("hour").style.visibility = "hidden";
+               document.getElementById("labelHour").style.visibility = "hidden";
+             }
+             
+             if(trigger == 1){
+              document.getElementById("btnStopUpdate").style.visibility = "visible";
+              console.log(trigger);
+            }
+      /*
+            $("#btn").click(function(){
+                var update = editor.getValue();
+                var day = $("#day").val();
+                var hour = $("#hour").val();
+                var script_url = 'https://script.google.com/macros/s/AKfycbz8iZoNWy-FTDZeRIIU4NruUmYLbwIf1V4nW_7OF_-EDXl7jM4/exec';
+                
+                $('#btn').html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true" id=""spinner"></span>Submitting...');
+                
+                if ($('input[name=update]:checked', '#select').val() == 'daily'){
+                   var request = $.ajax({
+                    url: script_url,
+                    method: "POST",
+                    dataType: "json",
+                    data: {
+                        update:update,
+                        hour:hour
+                    },
+                    success: function(data) {
+                      $('#btn').find("span").remove();
+                      $('#btn').html("Submit");
+                      google.script.run.createTrigger();
+                      document.getElementById("btnStopUpdate").style.visibility = "visible";
+                      google.script.run.withSuccessHandler(onSuccess).getQueries();
+                    },
+                    error: function() {
+                      $('#btn').find("span").remove();
+                      $('#btn').html("Submit");
+                      alert('There was some error performing the AJAX call!');
+                    }
+                });
+                }else if ($('input[name=update]:checked', '#select').val() == 'weekly'){
+                  var request = $.ajax({
+                    url: script_url,
+                    method: "POST",
+                    dataType: "json",
+                    data: {
+                        update:update,
+                        hour:hour,
+                        day:day
+                    },
+                    success: function(data) {
+                      $('#btn').find("span").remove();
+                      $('#btn').html("Submit");
+                      google.script.run.createTrigger();
+                      document.getElementById("btnStopUpdate").style.visibility = "visible";
+                      google.script.run.withSuccessHandler(onSuccess).getQueries();
+                    },
+                    error: function() {
+                      $('#btn').find("span").remove();
+                      $('#btn').html("Submit");
+                      alert('There was some error performing the AJAX call!');
+                    }
+                });
+                }else if($('input[name=update]:checked', '#select').val() == 'hourly'){
+                  var request = $.ajax({
+                    url: script_url,
+                    method: "POST",
+                    dataType: "json",
+                    data: {
+                        update:update
+                    },
+                    success: function(data) {
+                      $('#btn').find("span").remove();
+                      $('#btn').html("Submit");
+                      google.script.run.createTrigger();
+                      document.getElementById("btnStopUpdate").style.visibility = "visible";
+                      google.script.run.withSuccessHandler(onSuccess).getQueries();
+                    },
+                    error: function() {
+                      $('#btn').find("span").remove();
+                      $('#btn').html("Submit");
+                      alert('There was some error performing the AJAX call!');
+                    }
+                });
+                }
+                                
+                return false;
+            });       
+            
+            */
+        });  
+        
+        $("#btn").click(function(){
+                var update = editor.getValue();
+                var day = $("#day").val();
+                var hour = $("#hour").val();
+                var sheet = $("#sheet").val();
+                
+                if(update!='' && sheet!=null){
+                
+                  $('#btn').html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true" id=""spinner"></span>Submitting...');
+                  
+                  if ($('input[name=update]:checked', '#select').val() == 'daily'){
+                     google.script.run.withSuccessHandler(clickQ).query(update,hour,'noDay',sheet);
+                  }else if ($('input[name=update]:checked', '#select').val() == 'weekly'){
+                    google.script.run.withSuccessHandler(clickQ).query(update,hour,day,sheet);
+                  }else if($('input[name=update]:checked', '#select').val() == 'hourly'){
+                    google.script.run.withSuccessHandler(clickQ).query(update,'noHour','noDay',sheet);
+                  }
+                  
+                  function clickQ(){
+                        $('#btn').find("span").remove();
+                        $('#btn').html("Submit");
+                        google.script.run.withSuccessHandler(updateSucc).createTrigger();
+                        document.getElementById("btnStopUpdate").style.visibility = "visible";
+                        google.script.run.withSuccessHandler(onSuccess).getQueries();
+                        function updateSucc(){
+                          progressSheet();
+                        }
+                  }
+                }else{
+                  alert("Set query and sheet!");
+                }
+            });  
+        
+         $('#btntxt').click(function(){
+              document.getElementById("textfield").value = "";
+         });
+         
+         $('#progressSheet').click(function(){
+              $('#progressSheet').html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true" id=""spinner"></span>Loading...');
+              google.script.run.withSuccessHandler(onSS).updatingProgress();
+              function onSS(){
+                $('#progressSheet').find("span").remove();
+                $('#progressSheet').html($('<i/>',{class:'fa fa-clock-o'}));
+                progressSheet();
+              }
+              
+         });
+         
+         $('#btnStopUpdate').click(function(){
+             google.script.run.deleteTrigger();
+             alert('The update stopped');
+             document.getElementById("btnStopUpdate").style.visibility = "hidden";
+         });
+         $( "#queries" ).change(function() {
+             editor.setValue($("#queries").val());
+         });
+         
+    </script>
+</html>
